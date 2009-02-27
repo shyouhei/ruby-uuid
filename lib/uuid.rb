@@ -270,6 +270,12 @@ class UUID
 	def == other
 		to_i == other.to_i
 	end
+	alias eql? ==
+
+	# Two identical UUIDs should have same hash
+	def hash
+		to_i
+	end
 
 	include Comparable
 	# UUIDs are comparable (don't know what benefits are there, though).

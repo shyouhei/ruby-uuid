@@ -125,6 +125,18 @@ class TC_UUID < Test::Unit::TestCase
 			assert_equal i, u.clock
 		end
 	end
+
+	def test_equality
+		u1 = UUID.parse "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+		u2 = UUID.parse "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+		assert_equal u1.hash, u2.hash
+		case u1
+		when u2
+			assert_equal true, true # ok
+		else
+			flunk "u1 != u2"
+		end
+	end
 end
 
 
