@@ -27,12 +27,35 @@
 end
 
 # Pure ruby UUID generator, which is compatible with RFC4122
-UUID = Struct.new "UUID", :raw_bytes
 class UUID
 	# UUID epoch is 15th Oct. 1582
 	UNIXEpoch = 0x01B21DD213814000 # in 100-nanoseconds resolution
 
 	private_class_method :new
+
+	private
+	def initialize str
+		tmp = str.unpack "C*"
+		@num = tmp.inject do |r, i|
+			r * 256 | i
+		end
+		@num.freeze
+		self.freeze
+	end
+
+	public
+
+	def raw_bytes
+		ret = String.new
+		tmp = @num
+		16.times do |i|
+			x, y = tmp.divmod 256
+			ret << y
+			tmp = x
+		end
+		ret.reverse!
+		ret
+	end
 
 	class << self
 		def mask ver, str # :nodoc
@@ -62,10 +85,7 @@ class UUID
 			sha1.update str
 			sum = sha1.digest
 			raw = mask 5, sum[0..15]
-			ret = new raw
-			ret.raw_bytes.freeze
-			ret.freeze
-			ret
+			new raw
 		end
 
 		# UUID generation using MD5 (for backward compat.)
@@ -75,10 +95,7 @@ class UUID
 			md5.update str
 			sum = md5.digest
 			raw = mask 3, sum[0..16]
-			ret = new raw
-			ret.raw_bytes.freeze
-			ret.freeze
-			ret
+			new raw
 		end
 
 		# UUID  generation  using  random-number  generator.   From  it's  random
@@ -87,10 +104,7 @@ class UUID
 		def create_random
 			rnd = [prand, prand, prand, prand].pack "N4"
 			raw = mask 4, rnd
-			ret = new raw
-			ret.raw_bytes.freeze
-			ret.freeze
-			ret
+			new raw
 		end
 
 		def read_state fp			  # :nodoc:
@@ -176,20 +190,14 @@ class UUID
 			str = obj.to_s.sub %r/\Aurn:uuid:/, ''
 			str.gsub! %r/[^0-9A-Fa-f]/, ''
 			raw = str[0..31].to_a.pack 'H*'
-			ret = new raw
-			ret.raw_bytes.freeze
-			ret.freeze
-			ret
+			new raw
 		end
 
 		# The 'primitive constructor' of this class
 		# Note UUID.pack(uuid.unpack) == uuid
 		def pack tl, tm, th, ch, cl, n
 			raw = [tl, tm, th, ch, cl, n].pack "NnnCCa6"
-			ret = new raw
-			ret.raw_bytes.freeze
-			ret.freeze
-			ret
+			new raw
 		end
 	end
 
@@ -253,14 +261,12 @@ class UUID
 		"urn:uuid:" + self.to_s
 	end
 	alias urn to_uri
+	alias inspect to_uri
 
 	# Convert into 128-bit unsigned integer
 	# Typically a Bignum instance, but can be a Fixnum.
 	def to_int
-		tmp = self.raw_bytes.unpack "C*"
-		tmp.inject do |r, i|
-			r * 256 | i
-		end
+		@num
 	end
 	alias to_i to_int
 
