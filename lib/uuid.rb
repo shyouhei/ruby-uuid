@@ -141,9 +141,8 @@ class UUID
 						r = [prand].pack "N"
 						sha1.update r
 					end
-					str = sha1.digest
-					r = rand 34 # 40-6
-					node = str.bytes.to_a[r, 6] || str.bytes.to_a
+					ary = sha1.digest.bytes.to_a
+					node = ary.last 6
 					node[0] |= 0x01 # multicast bit
 					node = node.pack "C*"
 					k = rand 0x40000
