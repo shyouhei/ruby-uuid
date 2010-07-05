@@ -58,16 +58,16 @@ class UUID
 	end
 
 	class << self
-		def mask ver, str # :nodoc
+		def mask ver, str # :nodoc:
 			ver = ver & 15
-			v = str[6]
+			v = str[6].ord
 			v &= 0b0000_1111
 			v |= ver << 4
-			str[6] = v
-			r = str[8]
+			str[6] = v.chr
+			r = str[8].ord
 			r &= 0b0011_1111
 			r |= 0b1000_0000
-			str[8] = r
+			str[8] = r.chr
 			str
 		end
 
@@ -143,8 +143,9 @@ class UUID
 					end
 					str = sha1.digest
 					r = rand 34 # 40-6
-					node = str[r, 6] || str
+					node = str.bytes.to_a[r, 6] || str.bytes.to_a
 					node[0] |= 0x01 # multicast bit
+					node = node.pack "C*"
 					k = rand 0x40000
 					open STATE_FILE, 'w' do |fp|
 						fp.flock IO::LOCK_EX
@@ -189,7 +190,7 @@ class UUID
 		def parse obj
 			str = obj.to_s.sub %r/\Aurn:uuid:/, ''
 			str.gsub! %r/[^0-9A-Fa-f]/, ''
-			raw = str[0..31].to_a.pack 'H*'
+			raw = [str[0..31]].pack 'H*'
 			new raw
 		end
 
