@@ -21,11 +21,13 @@
 require 'rubygems'
 
 Gem::Specification.new do |spec|
-	spec.name = "uuid"
+	spec.name = "ruby-uuid"
 	spec.version = "0.0.1"
 	spec.summary = "Pure-ruby RFC4122 implementation"
 	spec.author = "URABE Shyouhei"
 	spec.email = "shyouhei@ruby-lang.org"
+	spec.homepage = "http://raa.ruby-lang.org/project/ruby-uuid/"
+	spec.description = "UUID generator/parser in <300 lines. It fully supports UUID versions 1, 3, 4 and 5."
 	spec.files = Dir.glob("{test,lib}/**/*")
 	spec.test_files = ["test/test_uuid.rb"]
 end  
